@@ -1,7 +1,7 @@
 package prueba.example.usuario_admin.controller;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,20 +21,19 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(value="/api")
+@RequiredArgsConstructor
 public class UserManagerController {
 
-	@Autowired
-	private UserManagerService userService;
+	private final UserManagerService userService;
 
 	
 	@PostMapping("/login")
 	public ResponseEntity<Object> login(@RequestHeader Map<String,String> headers) {
-
 		return userService.login(headers);
 	}
 
 	@PostMapping("/sign-up")
-	public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequestDTO authRequest){
+	public ResponseEntity<Object> signUp(@Valid @RequestBody SignUpRequestDTO authRequest){
 		return userService.signUp(authRequest);
 	}
 

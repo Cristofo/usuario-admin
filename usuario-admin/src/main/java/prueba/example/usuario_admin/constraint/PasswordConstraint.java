@@ -17,7 +17,6 @@ public class PasswordConstraint implements ConstraintValidator<PasswordValidator
 
     @Override
     public boolean isValid(String password, ConstraintValidatorContext constraintContext) {
-        password = password.toLowerCase();
         return password.matches("^\\D*(?:\\d\\D*){2}$") &&
                 password.matches("^[^A-Z]*[A-Z][^A-Z]*$");
     }

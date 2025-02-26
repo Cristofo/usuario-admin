@@ -38,7 +38,7 @@ public class UserManagerServiceImpl implements UserManagerService {
 	@Override
 	public ResponseEntity<Object> login(Map<String,String> headers) {
 
-		// validar token
+		// Obtiene token desde BD para validar que sea igual al del header
 		String tokenOld = getHeader("authorization", headers);
 		tokenOld = tokenOld.substring(7);
 		UserEntity userEntity = userRepository.findByToken(tokenOld);
@@ -47,7 +47,7 @@ public class UserManagerServiceImpl implements UserManagerService {
 			throw new GeneralException("Token inválido");
 		}
 
-		//Actualizar user
+		//Actualizar user con nuevos datos
 		final String tokenNew =  jwtTokenUtil.generateTokenByUserName(userEntity.getEmail());
 		userEntity.setLastLogin(userUtils.getCurrentDate());
 		userEntity.setToken(tokenNew);
@@ -57,6 +57,7 @@ public class UserManagerServiceImpl implements UserManagerService {
 
 		List<PhoneDTO> phoneEntities = mapList(userEntity.getPhones(), PhoneDTO.class);
 
+		// Creamos respuesta con datos de userEntity obtenido desde BD
 		LoginResponseDTO loginResponseDTO = LoginResponseDTO.builder()
 				.id(userEntity.getId())
 				.lastLogin(userEntity.getLastLogin())
@@ -77,12 +78,15 @@ public class UserManagerServiceImpl implements UserManagerService {
 
 		validateUnique(signUpRequestDTO.getEmail());
 
+		// Se genera token a partir del email
 		final String token =  jwtTokenUtil.generateTokenByUserName(signUpRequestDTO.getEmail());
 
+		// Se codifica el password
 		String encodedPassword = passwordEncoder.encode(signUpRequestDTO.getPassword());
 
 		List<PhoneEntity> phoneEntities = mapList(signUpRequestDTO.getPhones(), PhoneEntity.class);
 
+		//Se Obtienen datos del userEntity
 		UserEntity userEntity = UserEntity.builder()
 				.email(signUpRequestDTO.getEmail())
 				.created(userUtils.getCurrentDate())
@@ -92,13 +96,16 @@ public class UserManagerServiceImpl implements UserManagerService {
 				.phones(phoneEntities)
 				.build();
 
+		// Se genera la relación entre user y telefonos en caso de que no sean null
 		List<PhoneEntity> phones = userEntity.getPhones();
 		if(Objects.nonNull(phones)) {
 			phones.forEach(phone -> phone.setUserEntity(userEntity));
 		}
 
+		// Se actualiza token
 		userRepository.save(userEntity);
 
+		// Se crea response de salida
 		SignUpResponseDTO signUpResponseDTO = SignUpResponseDTO.builder()
 				.id(userEntity.getId())
 				.created(userEntity.getCreated())
@@ -123,6 +130,10 @@ public class UserManagerServiceImpl implements UserManagerService {
 		return headers.get(key);
 	}
 
+	/**
+	 * Validamos que el usuario de email sea distinto.
+	 * @param email usuario
+	 */
 	private void validateUnique(String email){
 		if(Objects.nonNull(userRepository.findByEmail(email))){
 			throw new GeneralException("El usuario ya existe");

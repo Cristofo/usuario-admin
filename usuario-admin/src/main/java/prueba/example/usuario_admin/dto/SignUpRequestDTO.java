@@ -1,5 +1,6 @@
 package prueba.example.usuario_admin.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import prueba.example.usuario_admin.validator.PasswordValidator;
 
@@ -8,6 +9,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
+@Builder
 public class SignUpRequestDTO {
 
 	private String name;
